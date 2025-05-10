@@ -5,6 +5,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const logger = require("./utils/logger");
 const { router } = require("./routes/post-route");
+const Redis = require("ioredis");
 mongoose
   .connect(process.env.DATABASE_URL)
   .then(() => {
@@ -16,11 +17,20 @@ mongoose
 
 const app = express();
 
+const redisClient = new Redis(process.env.REDIS_URL);
+
 app.use(express.json());
 app.use(helmet());
 app.use(cors());
 
-app.use("/api/posts", router);
+app.use(
+  "/api/posts",
+  (req, res, next) => {
+    req.redisClient = redisClient;
+    next();
+  },
+  router
+);
 
 const startServer = async () => {
   try {
