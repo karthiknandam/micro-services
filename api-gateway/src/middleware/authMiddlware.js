@@ -19,10 +19,7 @@ const validateToken = async (req, res, next) => {
       logger.warn("Unauthorzed token / Please Login");
       return res.status(400).json({
         success: false,
-        token,
-        secreat: process.env.JWT_SECRET,
         message: "Unauthorized token / Please Login",
-        err,
       });
     }
 
