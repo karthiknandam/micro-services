@@ -10,6 +10,7 @@ const proxy = require("express-http-proxy");
 const { validateToken } = require("./middleware/authMiddlware");
 // const { validateToken } = require("./middleware/authMiddleware");
 
+const PORT = process.env.PORT || 3000;
 const app = express();
 
 // Database;
@@ -95,6 +96,33 @@ app.use(
   })
 );
 
-app.listen(3000, () => {
-  logger.info("Server is running in port 300");
+app.use(
+  "/v1/media",
+  validateToken,
+  proxy(process.env.MEDIA_SERVICE_URL, {
+    ...proxyOptions,
+    proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+      proxyReqOpts.headers["x-user-id"] = srcReq.user.userId;
+      if (!srcReq.headers["content-type"].startsWith("multipart/form-data")) {
+        proxyReqOpts.headers["Content-Type"] = "application/json";
+      }
+
+      return proxyReqOpts;
+    },
+    userResDecorator: (proxyRes, proxyResData, userReq, userRes) => {
+      logger.info(
+        `Response received from media service: ${proxyRes.statusCode}`
+      );
+
+      return proxyResData;
+    },
+    parseReqBody: false,
+  })
+);
+
+app.listen(PORT, () => {
+  logger.info("Server is running in port : ", PORT);
+  logger.info("identity sevice running in port 3001");
+  logger.info("post sevice running in port 3002");
+  logger.info("media sevice running in port 3003");
 });
