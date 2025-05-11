@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const logger = require("./utils/logger");
 const { router } = require("./routes/post-route");
 const Redis = require("ioredis");
+const { connectRabbitmq } = require("./utils/rabbimq");
 mongoose
   .connect(process.env.DATABASE_URL)
   .then(() => {
@@ -35,7 +36,7 @@ app.use(
 const startServer = async () => {
   try {
     // Rabbotmq logic
-
+    await connectRabbitmq();
     app.listen(process.env.PORT | 3002, () => {
       logger.info("POST service is listening in the port 3002");
     });
