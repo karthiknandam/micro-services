@@ -25,6 +25,17 @@ const uploadMediaCloudinary = async (file) => {
   });
 };
 
+const deleteMediaCloudinary = async (publicId) => {
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+    logger.info("Post Deleted ✅");
+    return result;
+  } catch (error) {
+    logger.warn("Internal server error : ", error);
+  }
+};
+
 module.exports = {
   uploadMediaCloudinary,
+  deleteMediaCloudinary,
 };
