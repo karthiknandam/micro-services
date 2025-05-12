@@ -3,13 +3,13 @@ const logger = require("./logger");
 let connection = null;
 let channel = null;
 
-const EXCHANEG = "social-media";
+const EXCHANGE_NAME = "social-media";
 
 const connectRabbitmq = async () => {
   try {
     connection = await amqp.connect(process.env.RABBITMQ_URL);
     channel = await connection.createChannel();
-    await channel.assertExchange(EXCHANEG, "topic", { durable: false });
+    await channel.assertExchange(EXCHANGE_NAME, "topic", { durable: false });
     logger.info("Channel created ✅");
     return channel;
   } catch (error) {
@@ -17,4 +17,17 @@ const connectRabbitmq = async () => {
   }
 };
 
-module.exports = { connectRabbitmq };
+const publishEvent = async (routingKey, message) => {
+  if (!channel) {
+    await connectToRabbitMQ();
+  }
+
+  channel.publish(
+    EXCHANGE_NAME,
+    routingKey,
+    Buffer.from(JSON.stringify(message))
+  );
+  logger.info(`Event published: ${routingKey}`);
+};
+
+module.exports = { connectRabbitmq, publishEvent };
