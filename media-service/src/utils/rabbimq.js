@@ -30,9 +30,9 @@ const publishEvent = async (routingKey, message) => {
   logger.info(`Event published : ${routingKey}`);
 };
 
-const consumeEvent = async (routingKey, message) => {
+const consumeEvent = async (routingKey, callback) => {
   if (!channel) {
-    await connectRabbitmq;
+    await connectRabbitmq();
   }
 
   const q = await channel.assertQueue("", { exclusive: true });
