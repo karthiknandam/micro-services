@@ -2,6 +2,7 @@
 
 const { Post } = require("../models/Post");
 const logger = require("../utils/logger");
+const { publishEvent } = require("../utils/rabbimq");
 const { validateCreatedPost } = require("../utils/validation");
 
 const invalidateCache = async (req, index = "none") => {
@@ -149,6 +150,14 @@ const deletePost = async (req, res) => {
         message: "post not found",
       });
     }
+
+    // Publishing event to delete the post in the cloud
+
+    await publishEvent("post.deleted", {
+      postId: post._id,
+      mediaIds: post.mediaIds,
+      userId: req.user.userId,
+    });
 
     await invalidateCache(req, req.params.id);
 
