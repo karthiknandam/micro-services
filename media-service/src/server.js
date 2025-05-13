@@ -5,7 +5,8 @@ const helmet = require("helmet");
 const express = require("express");
 const logger = require("./utils/logger");
 const { router } = require("./routes/media-route");
-
+const { connectRabbitmq, consumeEvent } = require("./utils/rabbimq");
+const { handlerMediaDelete } = require("./eventhandler/media-event-handler");
 const app = express();
 
 mongoose
@@ -29,6 +30,10 @@ app.use("/api/media", router);
 
 const startServer = async () => {
   try {
+    await connectRabbitmq();
+
+    // Consume event that are passing through rabbit;
+    await consumeEvent("post.deleted", handlerMediaDelete);
     app.listen(3003, () => {
       logger.info("Media-service is running in port 3000");
     });
