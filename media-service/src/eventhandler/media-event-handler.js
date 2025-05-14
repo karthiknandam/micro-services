@@ -3,9 +3,13 @@ const { Media } = require("../models/Media");
 const logger = require("../utils/logger");
 
 const handlerMediaDelete = async (event) => {
-  const { postId, mediaId } = event;
+  logger.debug("Event Event ", event);
+  console.log({
+    event,
+  });
+  const { postId, mediaIds } = event;
   try {
-    const mediasToDelete = await Media.find({ _id: mediaId }); // Here this might be array or single postID
+    const mediasToDelete = await Media.find({ _id: mediaIds }); // Here this might be array or single postID
     for (const media of mediasToDelete) {
       await deleteMediaCloudinary(media.publicId);
       await Media.deleteOne({ _id: media._id });
