@@ -41,7 +41,12 @@ const create = async (req, res) => {
     await newlyCreatedPost.save();
 
     // Saved and goes to next sending rqbbit mq
-
+    await publishEvent("post.created", {
+      postId: newlyCreatedPost._id,
+      userId: req.user.userId,
+      content,
+      createdAt: newlyCreatedPost.createdAt,
+    });
     // implementing invalidate Cache before sending it;
 
     await invalidateCache(req);
