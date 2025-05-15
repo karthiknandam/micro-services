@@ -120,9 +120,32 @@ app.use(
   })
 );
 
+app.use(
+  "/v1/search",
+  validateToken,
+  proxy(process.env.SEARCH_SERVICE_URL, {
+    ...proxyOptions,
+    proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+      proxyReqOpts.headers["x-user-id"] = srcReq.user.userId;
+      proxyReqOpts.headers["Content-Type"] = "application/json";
+
+      return proxyReqOpts;
+    },
+    userResDecorator: (proxyRes, proxyResData, userReq, userRes) => {
+      logger.info(
+        `Response received from media service: ${proxyRes.statusCode}`
+      );
+
+      return proxyResData;
+    },
+    parseReqBody: false,
+  })
+);
+
 app.listen(PORT, () => {
   logger.info("Server is running in port : ", PORT);
   logger.info("identity sevice running in port 3001");
   logger.info("post sevice running in port 3002");
   logger.info("media sevice running in port 3003");
+  logger.info("search sevice running in port 3004");
 });
